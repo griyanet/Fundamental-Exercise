@@ -1,38 +1,85 @@
 package com.griyanet.myapplication
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
+
+    private lateinit var edtWidth: EditText
+    private lateinit var edtHeight: EditText
+    private lateinit var edtLength: EditText
+    private lateinit var btnCalculate: Button
+    private lateinit var tvResult: TextView
+
+    companion object {
+        private const val STATE_RESULT = "state_result"
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_RESULT, tvResult.text.toString())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
 
-        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        edtWidth = findViewById(R.id.edt_width)
+        edtHeight = findViewById(R.id.edt_height)
+        edtLength = findViewById(R.id.edt_length)
+        btnCalculate = findViewById(R.id.btn_Calculate)
+        tvResult = findViewById(R.id.tv_result)
+
+        btnCalculate.setOnClickListener(this)
+
+        if (savedInstanceState != null) {
+            val result = savedInstanceState.getString(STATE_RESULT)
+            tvResult.text = result
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
+    override fun onClick(v: View?) {
+        if (v != null) {
+            if (v.id == R.id.btn_Calculate) {
+                val inputLength = edtLength.text.toString().trim()
+                val inputWidth = edtWidth.text.toString().trim()
+                val inputHeight = edtHeight.text.toString().trim()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+                var isEmptyFields = false
+
+                when {
+                    inputLength.isEmpty() -> {
+                        isEmptyFields = true
+                        edtLength.error = "Field ini tidak boleh kosong"
+                    }
+                    inputHeight.isEmpty() -> {
+                        isEmptyFields = true
+                        edtHeight.error = "Field ini tidak boleh kosong"
+                    }
+                    inputWidth.isEmpty() -> {
+                        isEmptyFields = true
+                        edtWidth.error = "Field ini tidak boleh kosong"
+                    }
+                }
+
+                if (!isEmptyFields) {
+                    val volume =
+                        inputLength.toDouble() * inputWidth.toDouble() * inputHeight.toDouble()
+                    tvResult.text = volume.toString()
+                }
+            }
         }
     }
+
+
 }
+
